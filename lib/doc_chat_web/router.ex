@@ -18,6 +18,7 @@ defmodule DocChatWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    live "/search", SearchLive
   end
 
   # Other scopes may use custom stacks.
