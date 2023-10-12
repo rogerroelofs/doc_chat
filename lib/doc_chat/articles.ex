@@ -168,24 +168,43 @@ defmodule DocChat.Articles do
 
   """
   def ask(question) do
-    system_msg = "As an Apricot customer support tech"
-    context = search(question)
+    system_msg = "As an Apricot customer support tech use get_apricot_instructions to answer questions"
     # a custom Elixir function made available to the LLM
     custom_fn =
       Function.new!(%{
-        name: "custom_fn",
-        description: "returns list of articles matching query.",
-        function: fn _arguments, context ->
-          Jason.encode!(context)
+        name: "get_apricot_instructions",
+        description: "returns a list of instructions for how to use Apricot.",
+        parameters_schema: %{
+          type: "object",
+          properties: %{
+            subject: %{
+              type: "string",
+              description: "The subject of the help request."
+            }
+          },
+          required: ["subject"]
+        },
+        function: fn %{"subject" => subject} = _args, _context ->
+          content = search(subject)
+            |> Enum.filter(fn article ->
+              ! String.contains?(article.content, ["egistration", "Funders", "not support"])
+            end)
+            |> Enum.take(3)
+            |> Enum.map(fn article ->
+              %{
+                content: String.slice(article.content, 0..400),
+                url: article.url
+              }
+            end)
+          Jason.encode!(content)
         end
       })
 
     # create and run the chain
     {:ok, _updated_chain, %Message{} = message} =
       LLMChain.new!(%{
-        llm: ChatOpenAI.new!(),
-        custom_context: context,
-        verbose: true
+        llm: ChatOpenAI.new!(%{model: "gpt-3.5-turbo-0613", temperature: 1, stream: false}),
+        # verbose: true
       })
       |> LLMChain.add_functions([custom_fn])
       |> LLMChain.add_message(Message.new_system!(system_msg))
