@@ -157,14 +157,14 @@ defmodule DocChat.Articles do
     end)
   end
 
-  @spec ask(String.t()) :: String.t()
+  @spec ask(String.t()) :: {:ok, LangChain.Chains.LLMChain.t()}
   @doc """
   Sends the query to ChatGPT and returns the result.
 
   ## Examples
 
       iex> ask("hello")
-      "Some Text"
+      {:ok, chain}
 
   """
   def ask(question) do
@@ -189,10 +189,10 @@ defmodule DocChat.Articles do
             |> Enum.filter(fn article ->
               ! String.contains?(article.content, ["egistration", "Funders", "not support"])
             end)
-            |> Enum.take(3)
+            |> Enum.take(5)
             |> Enum.map(fn article ->
               %{
-                content: String.slice(article.content, 0..400),
+                content: String.slice(article.content, 0..500),
                 url: article.url
               }
             end)
@@ -201,16 +201,31 @@ defmodule DocChat.Articles do
       })
 
     # create and run the chain
-    {:ok, _updated_chain, %Message{} = message} =
-      LLMChain.new!(%{
+    chain = LLMChain.new!(%{
         llm: ChatOpenAI.new!(%{model: "gpt-3.5-turbo-0613", temperature: 1, stream: false}),
-        # verbose: true
+        verbose: true
       })
       |> LLMChain.add_functions([custom_fn])
       |> LLMChain.add_message(Message.new_system!(system_msg))
+
+    ask(question, chain)
+  end
+
+  @spec ask(String.t(), LangChain.Chains.LLMChain.t()) :: {:ok, LangChain.Chains.LLMChain.t()}
+  @doc """
+  Sends the most recent chain query back to ChatGPT and returns the result.
+
+  ## Examples
+
+      iex> ask("hello", prev_chain)
+      {:ok, chain}
+
+  """
+  def ask(question, chain) do
+    {:ok, updated_chain, %Message{} = _message} = chain
       |> LLMChain.add_message(Message.new_user!(question))
       |> LLMChain.run(while_needs_response: true)
 
-    message.content
+    {:ok, updated_chain}
   end
 end
