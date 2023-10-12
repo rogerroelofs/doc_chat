@@ -123,4 +123,13 @@ if config_env() == :dev do
   config :langchain, openai_key: System.get_env("OPENAI_KEY")
   config :langchain, openai_org_id: System.get_env("OPENAI_ORG_ID")
 
+  config :doc_chat, DocChat.Repo,
+    username: "postgres",
+    password: System.get_env("POSTGRES_PASSWORD"),
+    hostname: "localhost",
+    database: "doc_chat_dev",
+    stacktrace: true,
+    show_sensitive_data_on_connection_error: true,
+    pool_size: 10
+
 end

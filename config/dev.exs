@@ -3,7 +3,7 @@ import Config
 # Configure your database
 config :doc_chat, DocChat.Repo,
   username: "postgres",
-  password: "LetMe1n",
+  password: "postgres",
   hostname: "localhost",
   database: "doc_chat_dev",
   stacktrace: true,

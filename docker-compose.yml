@@ -6,7 +6,7 @@ services:
     ports:
       - 5432:5432
     environment:
-      POSTGRES_PASSWORD: LetMe1n
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}"
     volumes: 
       - pgdata:/var/lib/postgresql/data
 
