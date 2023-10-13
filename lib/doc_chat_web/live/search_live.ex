@@ -18,8 +18,12 @@ defmodule DocChatWeb.SearchLive do
   def handle_info({ref, result}, socket) do
     Process.demonitor(ref, [:flush])
     {:ok, chain} = result
-    new_messages = format_messages(chain.messages)
-    combined_messages = socket.assigns.messages ++ new_messages
+  
+    assistant_messages = format_messages(chain.messages)
+    |> Enum.filter(fn msg -> msg.role == :assistant end)
+  
+    combined_messages = socket.assigns.messages ++ assistant_messages
+    
     {:noreply,
       assign(socket,
         search_activated: false,
