@@ -46,9 +46,10 @@ defmodule DocChatWeb.SearchLive do
 
   def render(assigns) do
     ~H"""
-    <div class="flex h-screen flex-col">
+    <div class="flex flex-col">
       <!-- Scrollable message container -->
-      <div class="flex flex-col space-y-4 p-4 w-1/2 mx-auto overflow-y-auto h-1/2">
+      <h1 class="mt-8 ml-8 text-2xl font-bold">Doc Chat</h1>
+      <div class="flex flex-col space-y-4 p-4 w-1/2 mx-auto overflow-y-auto h-1/2 h-[600px]">
         <%= for msg <- @messages do %>
           <div class={ "self-start w-full " <> (if msg.role == :user, do: "text-black", else: "bg-gray-100 text-black") }>
             <div class="px-4 py-0 prose">
@@ -69,20 +70,15 @@ defmodule DocChatWeb.SearchLive do
       <!-- Search bar -->
       <div class="flex-grow flex items-center">
         <div class="text-center w-full">
-          <!-- Title disappears when @search_activated is true -->
-          <%= if not @search_activated do %>
-            <h1 class="text-4xl font-bold mb-4">Doc Chat</h1>
-          <% end %>
-
-          <form phx-submit="submit_question" class="flex border rounded overflow-hidden w-1/2 mx-auto">
+          <form phx-submit="submit_question" class="flex w-1/2 mx-auto relative">
             <input type="text"
               name="question"
               placeholder="Enter your question..."
-              class="p-2 flex-grow outline-none"
+              class="p-2 flex-grow outline-none rounded-full pl-6 focus:outline-none"
               phx-input="search"
               value={@question} />
-            <button type="submit" class="p-2 bg-blue-500 text-white flex items-center justify-center w-10">
-              <i class="fas fa-paper-plane"></i>
+            <button type="submit" class="absolute inset-y-0 right-0 p-2 flex items-center justify-center w-10 pr-6">
+              <i class="fas fa-paper-plane text-gray-600"></i>
             </button>
           </form>
         </div>
