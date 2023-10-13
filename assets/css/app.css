@@ -3,3 +3,7 @@
 @import "tailwindcss/utilities";
 
 /* This file is for your main application CSS */
+div.user p {
+    font-weight: bold;
+    font-size: larger;
+}
