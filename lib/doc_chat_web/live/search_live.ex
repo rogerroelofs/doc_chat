@@ -18,18 +18,12 @@ defmodule DocChatWeb.SearchLive do
   def handle_info({ref, result}, socket) do
     Process.demonitor(ref, [:flush])
     {:ok, chain} = result
-  
-    assistant_messages = format_messages(chain.messages)
-    |> Enum.filter(fn msg -> msg.role == :assistant end)
-  
-    combined_messages = socket.assigns.messages ++ assistant_messages
-    
     {:noreply,
       assign(socket,
         search_activated: false,
         question: "",
         chain: chain,
-        messages: combined_messages,
+        messages: format_messages(chain.messages),
         loading: false)}
   end
 
@@ -52,8 +46,8 @@ defmodule DocChatWeb.SearchLive do
       <div class="flex flex-col space-y-4 p-4 w-1/2 mx-auto overflow-y-auto h-1/2">
         <%= for msg <- @messages do %>
           <div class={ "self-start w-full " <> (if msg.role == :user, do: "text-black", else: "bg-gray-100 text-black") }>
-            <div class="px-4 py-2">
-              <%= msg.content %>
+            <div class="px-4 py-0 prose">
+              <div class={msg.role}><%= Phoenix.HTML.raw(Earmark.as_html!(msg.content)) %></div>
             </div>
           </div>
         <% end %>
