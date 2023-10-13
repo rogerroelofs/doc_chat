@@ -16,7 +16,6 @@ defmodule DocChatWeb.SearchLive do
     Process.demonitor(ref, [:flush])
     {:ok, chain} = result
     messages = format_messages(chain.messages)
-    IO.inspect messages
     {:noreply,
       assign(socket,
         search_activated: false,
@@ -27,7 +26,6 @@ defmodule DocChatWeb.SearchLive do
 
   defp format_messages(messages) do
     Enum.filter(messages, fn(msg) ->
-      IO.inspect(msg)
       msg.content != nil && Enum.member?([:user, :assistant], msg.role)
     end)
     |> Enum.map(fn(msg) ->
@@ -82,7 +80,7 @@ defmodule DocChatWeb.SearchLive do
         <div class="w-3/4 flex flex-col">
           <div class="flex-grow overflow-y-auto p-4">
             <%= Enum.map(@messages, fn(msg) -> %>
-              <p><%= msg.content %></p>
+              <div class={msg.role}><%= Phoenix.HTML.raw(Earmark.as_html!(msg.content)) %></div>
             <% end) %>
           </div>
         </div>
