@@ -78,7 +78,7 @@ defmodule DocChatWeb.SearchLive do
 
         <!-- Main chat area -->
         <div class="w-3/4 flex flex-col">
-          <div class="flex-grow overflow-y-auto p-4">
+          <div class="flex-grow overflow-y-auto p-4 prose">
             <%= Enum.map(@messages, fn(msg) -> %>
               <div class={msg.role}><%= Phoenix.HTML.raw(Earmark.as_html!(msg.content)) %></div>
             <% end) %>
