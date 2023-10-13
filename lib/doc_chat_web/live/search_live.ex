@@ -9,10 +9,10 @@ defmodule DocChatWeb.SearchLive do
     user_question = %{content: question, role: :user}
     new_messages = socket.assigns.messages ++ [user_question]
 
-    ref =Task.async(fn ->
+    Task.async(fn ->
       DocChat.Articles.ask(question)
     end)
-    {:noreply, assign(socket, search_activated: true, question: question, messages: new_messages, loading: true, task_ref: ref)}
+    {:noreply, assign(socket, search_activated: true, question: question, messages: new_messages, loading: true)}
   end
 
   def handle_info({ref, result}, socket) do
