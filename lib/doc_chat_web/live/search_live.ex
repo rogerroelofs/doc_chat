@@ -8,21 +8,25 @@ defmodule DocChatWeb.SearchLive do
   def handle_event("submit_question", %{"question" => question}, socket) do
     user_question = %{content: question, role: :user}
     new_messages = socket.assigns.messages ++ [user_question]
-  
-    ref = Task.async(fn ->
+
+    ref =Task.async(fn ->
       DocChat.Articles.ask(question)
     end)
-  
-    {:noreply, assign(socket, search_activated: true, question: "", messages: new_messages, loading: true, task_ref: ref)}
+    {:noreply, assign(socket, search_activated: true, question: question, messages: new_messages, loading: true, task_ref: ref)}
   end
-  
-  def handle_info({ref, {:ok, answer}}, socket) when ref == socket.assigns.task_ref do
+
+  def handle_info({ref, result}, socket) do
     Process.demonitor(ref, [:flush])
-    
-    actual_answer = %{content: answer, role: :assistant}
-    new_messages = socket.assigns.messages ++ [actual_answer]
-    
-    {:noreply, assign(socket, search_activated: false, question: "", messages: new_messages, loading: false)}
+    {:ok, chain} = result
+    new_messages = format_messages(chain.messages)
+    combined_messages = socket.assigns.messages ++ new_messages
+    {:noreply,
+      assign(socket,
+        search_activated: false,
+        question: "",
+        chain: chain,
+        messages: combined_messages,
+        loading: false)}
   end
 
   defp format_messages(messages) do
