@@ -84,24 +84,6 @@ defmodule DocChatWeb.SearchLive do
           </form>
         </div>
       </div>
-
-      <!-- Sidebar for history and chat area, only when search is activated -->
-      <div class="flex w-full mt-10">
-        <!-- Sidebar for history -->
-        <div class="w-1/4 bg-gray-200 p-4 overflow-y-auto">
-          <h2 class="text-xl font-bold mb-4">History</h2>
-          <!-- History items here -->
-        </div>
-
-        <!-- Main chat area -->
-        <div class="w-3/4 flex flex-col">
-          <div class="flex-grow overflow-y-auto p-4 prose">
-            <%= Enum.map(@messages, fn(msg) -> %>
-              <div class={msg.role}><%= Phoenix.HTML.raw(Earmark.as_html!(msg.content)) %></div>
-            <% end) %>
-          </div>
-        </div>
-      </div>
     </div>
     """
   end
