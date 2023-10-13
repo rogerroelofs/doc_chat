@@ -2,7 +2,7 @@ defmodule DocChatWeb.SearchLive do
   use Phoenix.LiveView
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, search_activated: false, question: nil, messages: [], loading: false)}
+    {:ok, assign(socket, search_activated: false, question: nil, messages: [], loading: false, chain: nil)}
   end
 
   def handle_event("submit_question", %{"question" => question}, socket) do
@@ -10,7 +10,12 @@ defmodule DocChatWeb.SearchLive do
     new_messages = socket.assigns.messages ++ [user_question]
 
     Task.async(fn ->
-      DocChat.Articles.ask(question)
+      chain = socket.assigns.chain
+      if chain != nil do
+        DocChat.Articles.ask(question, chain)
+      else
+        DocChat.Articles.ask(question)
+      end
     end)
     {:noreply, assign(socket, search_activated: true, question: question, messages: new_messages, loading: true)}
   end
