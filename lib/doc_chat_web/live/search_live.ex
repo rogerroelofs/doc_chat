@@ -2,26 +2,27 @@ defmodule DocChatWeb.SearchLive do
   use Phoenix.LiveView
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, search_activated: false, question: nil, messages: [])}
+    {:ok, assign(socket, search_activated: false, question: "", messages: [], loading: false)}
   end
 
   def handle_event("submit_question", %{"question" => question}, socket) do
-    Task.async(fn ->
+    user_question = %{content: question, role: :user}
+    new_messages = socket.assigns.messages ++ [user_question]
+  
+    ref = Task.async(fn ->
       DocChat.Articles.ask(question)
     end)
-    {:noreply, assign(socket, search_activated: true, question: question)}
+  
+    {:noreply, assign(socket, search_activated: true, question: "", messages: new_messages, loading: true, task_ref: ref)}
   end
-
-  def handle_info({ref, result}, socket) do
+  
+  def handle_info({ref, {:ok, answer}}, socket) when ref == socket.assigns.task_ref do
     Process.demonitor(ref, [:flush])
-    {:ok, chain} = result
-    messages = format_messages(chain.messages)
-    {:noreply,
-      assign(socket,
-        search_activated: false,
-        question: "",
-        chain: chain,
-        messages: messages)}
+    
+    actual_answer = %{content: answer, role: :assistant}
+    new_messages = socket.assigns.messages ++ [actual_answer]
+    
+    {:noreply, assign(socket, search_activated: false, question: "", messages: new_messages, loading: false)}
   end
 
   defp format_messages(messages) do
@@ -39,50 +40,44 @@ defmodule DocChatWeb.SearchLive do
   def render(assigns) do
     ~H"""
     <div class="flex h-screen flex-col">
+      <!-- Scrollable message container -->
+      <div class="flex flex-col space-y-4 p-4 w-1/2 mx-auto overflow-y-auto h-1/2">
+        <%= for msg <- @messages do %>
+          <div class={ "self-start w-full " <> (if msg.role == :user, do: "text-black", else: "bg-gray-100 text-black") }>
+            <div class="px-4 py-2">
+              <%= msg.content %>
+            </div>
+          </div>
+        <% end %>
 
-      <!-- Display submitted question at the top -->
-      <%= if @search_activated do %>
-      <div class="text-center w-full mt-4">
-        <p class="text-xl">Question: <%= @question %></p>
+        <%= if @loading do %>
+          <div class="self-start w-full text-black bg-gray-100">
+            <div class="px-4 py-2">
+              Loading...
+            </div>
+          </div>
+        <% end %>
       </div>
-      <% end %>
 
-      <!-- Search bar centered -->
+      <!-- Search bar -->
       <div class="flex-grow flex items-center">
         <div class="text-center w-full">
-          <!-- Title -->
-          <h1 class="text-4xl font-bold mb-4">Doc Chat</h1>
+          <!-- Title disappears when @search_activated is true -->
+          <%= if not @search_activated do %>
+            <h1 class="text-4xl font-bold mb-4">Doc Chat</h1>
+          <% end %>
 
-          <!-- Search box -->
           <form phx-submit="submit_question" class="flex border rounded overflow-hidden w-1/2 mx-auto">
-            <input type="text"
-              name="question"
-              placeholder="Enter your question..."
-              class="p-2 flex-grow outline-none"
-              phx-input="search"
-              value={@question} />
+            <input type="text" 
+                   name="question" 
+                   placeholder="Enter your question..." 
+                   class="p-2 flex-grow outline-none" 
+                   phx-input="search" 
+                   value={@question} />
             <button type="submit" class="p-2 bg-blue-500 text-white flex items-center justify-center w-10">
               <i class="fas fa-paper-plane"></i>
             </button>
           </form>
-        </div>
-      </div>
-
-      <!-- Sidebar for history and chat area, only when search is activated -->
-      <div class="flex w-full mt-10">
-        <!-- Sidebar for history -->
-        <div class="w-1/4 bg-gray-200 p-4 overflow-y-auto">
-          <h2 class="text-xl font-bold mb-4">History</h2>
-          <!-- History items here -->
-        </div>
-
-        <!-- Main chat area -->
-        <div class="w-3/4 flex flex-col">
-          <div class="flex-grow overflow-y-auto p-4">
-            <%= Enum.map(@messages, fn(msg) -> %>
-              <div class={msg.role}><%= Phoenix.HTML.raw(Earmark.as_html!(msg.content)) %></div>
-            <% end) %>
-          </div>
         </div>
       </div>
     </div>
