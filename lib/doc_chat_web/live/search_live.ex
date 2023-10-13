@@ -68,12 +68,12 @@ defmodule DocChatWeb.SearchLive do
           <% end %>
 
           <form phx-submit="submit_question" class="flex border rounded overflow-hidden w-1/2 mx-auto">
-            <input type="text" 
-                   name="question" 
-                   placeholder="Enter your question..." 
-                   class="p-2 flex-grow outline-none" 
-                   phx-input="search" 
-                   value={@question} />
+            <input type="text"
+              name="question"
+              placeholder="Enter your question..."
+              class="p-2 flex-grow outline-none"
+              phx-input="search"
+              value={@question} />
             <button type="submit" class="p-2 bg-blue-500 text-white flex items-center justify-center w-10">
               <i class="fas fa-paper-plane"></i>
             </button>
