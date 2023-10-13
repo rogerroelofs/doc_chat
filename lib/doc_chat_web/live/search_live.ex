@@ -48,10 +48,10 @@ defmodule DocChatWeb.SearchLive do
     ~H"""
     <div class="flex flex-col">
       <!-- Scrollable message container -->
-      <h1 class="mt-8 ml-8 text-2xl font-bold">Doc Chat</h1>
+      <h1 class="mt-8 text-2xl font-bold text-center">Apricot Assistant</h1>
       <div id="message-container" phx-hook="ScrollToBottom" class="flex flex-col w-1/2 mx-auto overflow-y-auto h-1/2 h-[600px]">
         <%= for msg <- @messages do %>
-          <div class={ "self-start w-full" <> (if msg.role == :user, do: "text-black", else: "bg-gray-100 text-black") }>
+          <div class={ "self-start w-full " <> (if msg.role == :user, do: "text-black", else: "bg-gray-100 text-black") }>
             <div class="px-4 py-0 prose">
               <div class={msg.role}><%= Phoenix.HTML.raw(Earmark.as_html!(msg.content)) %></div>
             </div>
