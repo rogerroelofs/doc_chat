@@ -2,7 +2,7 @@ defmodule DocChatWeb.SearchLive do
   use Phoenix.LiveView
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, search_activated: false, question: nil, messages: [], loading: false, chain: nil)}
+    {:ok, assign(socket, page_title: "Ask a Question", search_activated: false, question: nil, messages: [], loading: false, chain: nil)}
   end
 
   def handle_event("submit_question", %{"question" => question}, socket) do

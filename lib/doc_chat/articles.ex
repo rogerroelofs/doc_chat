@@ -168,7 +168,12 @@ defmodule DocChat.Articles do
 
   """
   def ask(question) do
-    system_msg = "As an Apricot customer support tech use get_apricot_instructions to answer questions"
+    # system_msg = "As an Apricot customer support tech use get_apricot_instructions to answer questions"
+    system_msg = "As an Apricot customer support tech, using get_apricot_instructions only, answer the user's question.
+    Include the url of the information that you are using.
+    If the user's question cannot be answered using the provided information,
+    respond with \"I don't know\"."
+
     # a custom Elixir function made available to the LLM
     custom_fn =
       Function.new!(%{
