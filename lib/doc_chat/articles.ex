@@ -197,7 +197,8 @@ defmodule DocChat.Articles do
             |> Enum.take(5)
             |> Enum.map(fn article ->
               %{
-                content: String.slice(article.content, 0..500),
+                content: String.slice(article.content, 0..1500),
+                title: article.title,
                 url: article.url
               }
             end)
@@ -207,7 +208,7 @@ defmodule DocChat.Articles do
 
     # create and run the chain
     chain = LLMChain.new!(%{
-        llm: ChatOpenAI.new!(%{model: "gpt-3.5-turbo-0613", temperature: 1, stream: false}),
+        llm: ChatOpenAI.new!(%{model: "gpt-4", temperature: 1, stream: false}),
         # verbose: true
       })
       |> LLMChain.add_functions([custom_fn])
